@@ -7,31 +7,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-# Download necessary NLTK datasets
-nltk.download('reuters')
-nltk.download('punkt')
-nltk.download('stopwords')
+# Download necessary NLTK datasets with explicit error handling
+nltk.download('punkt', quiet=True)
+nltk.download('reuters', quiet=True)
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt_tab', quiet=True)
 
 # Load and preprocess the Reuters dataset
 st.title("Word2Vec Interactive Visualization")
 st.write("This app trains a Word2Vec model on the Reuters dataset and allows exploration of word embeddings.")
 
-@st.cache_resource
-def load_and_train_model():
-    stop_words = set(stopwords.words('english'))
-    corpus_sentences = []
-    for fileid in reuters.fileids():
-        raw_text = reuters.raw(fileid)
-        tokenized_sentence = [word.lower() for word in nltk.word_tokenize(raw_text) 
-                            if word.isalnum() and word.lower() not in stop_words]
-        corpus_sentences.append(tokenized_sentence)
-    
-    # Train Word2Vec model
-    model = Word2Vec(sentences=corpus_sentences, vector_size=100, window=5, min_count=5, workers=4)
-    return model
+stop_words = set(stopwords.words('english'))
+corpus_sentences = []
+for fileid in reuters.fileids():
+    raw_text = reuters.raw(fileid)
+    tokenized_sentence = [word.lower() for word in nltk.word_tokenize(raw_text) if word.isalnum() and word.lower() not in stop_words]
+    corpus_sentences.append(tokenized_sentence)
 
-# Load the model
-model = load_and_train_model()
+# Train Word2Vec model
+model = Word2Vec(sentences=corpus_sentences, vector_size=100, window=5, min_count=5, workers=4)
 
 # User input for word similarity
 word = st.text_input("Enter a word to find similar words:", "money")
@@ -49,8 +43,8 @@ if st.button("Visualize Word Embeddings"):
     tsne = TSNE(n_components=2, random_state=42)
     reduced_vectors = tsne.fit_transform(vectors)
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.scatter(reduced_vectors[:, 0], reduced_vectors[:, 1])
+    plt.figure(figsize=(10, 6))
+    plt.scatter(reduced_vectors[:, 0], reduced_vectors[:, 1])
     for i, word in enumerate(words):
-        ax.annotate(word, (reduced_vectors[i, 0], reduced_vectors[i, 1]))
-    st.pyplot(fig)
+        plt.annotate(word, (reduced_vectors[i, 0], reduced_vectors[i, 1]))
+    st.pyplot(plt)
