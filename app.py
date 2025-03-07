@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import re  # Add to imports at top
+import scipy
+from scipy.linalg import get_blas_funcs
 
 # Download necessary NLTK datasets with explicit error handling
 @st.cache_resource
